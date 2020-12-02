@@ -1,22 +1,49 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
 import Home from '../views/Home.vue'
+import layout from '../views/layout/layout'
 
 Vue.use(VueRouter)
 
 const routes = [
+  // {
+  //   path: '/',
+  //   name: 'Home',
+  //   component: Home
+  // },
+  {
+    path: '/home',
+    redirect: '/'
+  },
   {
     path: '/',
-    name: 'Home',
-    component: Home
+    name: 'layout',
+    component: layout,
+    children: [
+      {
+        path: '',
+        name: 'Home',
+        component: Home,
+        meta:{
+          title:'首页'
+        }
+      },
+      {
+        path: 'Record',
+        name: 'Record',
+        component: () => import('../views/Record/Record')
+      },
+    ]
   },
   {
     path: '/about',
     name: 'About',
-    // route level code-splitting
-    // this generates a separate chunk (about.[hash].js) for this route
-    // which is lazy-loaded when the route is visited.
-    component: () => import(/* webpackChunkName: "about" */ '../views/About.vue')
+    component: () => import('../views/About.vue')
+  },
+  {
+    path: '/login',
+    name: 'login',
+    component: () => import('../views/login/login')
   }
 ]
 
@@ -24,6 +51,16 @@ const router = new VueRouter({
   mode: 'history',
   base: process.env.BASE_URL,
   routes
+})
+router.beforeEach((to, from, next) => {// 网页名字
+  document.title = to.meta.title
+
+
+  let user = JSON.parse(localStorage.getItem('user'))//路由守卫
+
+  if (to.path === '/login') next()
+  else user ? next() : next('/login')
+
 })
 
 export default router
