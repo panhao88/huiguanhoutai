@@ -1,25 +1,44 @@
 <template>
-  <div class="box1">
-    <div class="box2">
+  <div>
+    <vue-particles
+      color="#fff"
+      :particleOpacity="0.7"
+      :particlesNumber="80"
+      shapeType="star"
+      :particleSize="4"
+      linesColor="#fff"
+      :linesWidth="1"
+      :lineLinked="true"
+      :lineOpacity="0.4"
+      :linesDistance="150"
+      :moveSpeed="3"
+      :hoverEffect="true"
+      hoverMode="grab"
+      :clickEffect="true"
+      clickMode="remove"
+      class="lizi"
+    >
+    </vue-particles>
+    <div class="login_box">
       <el-form
         :model="ruleForm"
         :rules="rules"
         ref="ruleForm"
-        label-width="100px"
+        label-position="left"
+        label-width="0"
         class="demo-ruleForm"
       >
-        <el-form-item label="用户名" prop="username">
-          <div class="input-name">
-            <el-input v-model="ruleForm.username"></el-input>
-          </div>
+        <h2 class="title">后台管理系统</h2>
+        <el-form-item prop="username" style="position: relative">
+          <el-input v-model="ruleForm.username" placeholder="账号"></el-input>
+          <!-- <img src="../assets/username.png" alt="" class="img_abs" /> -->
         </el-form-item>
-        <el-form-item label="密码" prop="password">
-          <div class="input-name">
-            <el-input v-model="ruleForm.password"></el-input>
-          </div>
+        <el-form-item prop="password" style="position: relative">
+          <el-input v-model="ruleForm.password" placeholder="密码" show-password ></el-input>
+          <!-- <img src="../assets/password.png" alt="" class="img_abs" /> -->
         </el-form-item>
-        <el-form-item>
-          <el-button type="primary" @click="resetForm">登录</el-button>
+        <el-form-item class="denglu" >
+          <el-button type="primary" @click="resetForm" >登录</el-button>
         </el-form-item>
       </el-form>
     </div>
@@ -30,15 +49,18 @@
 import axios from "axios";
 export default {
   name: "",
+  // 接收父组件传递过来的参数
   props: {},
+  // 注册组件
   components: {},
+  // 定义变量
   data() {
     return {
       ruleForm: {
-        username: "admin",
-        password: "111111",
+        username: "",
+        password: "",
       },
-      user:{},
+      user: {},
       rules: {
         username: [
           {
@@ -69,21 +91,22 @@ export default {
       },
     };
   },
+  // 事件方法执行
   methods: {
     resetForm() {
       this.$refs.ruleForm.validate((valid) => {
         if (valid) {
           axios
             .get(
-              `/api/api/login/doLogin?userName=${this.ruleForm.username}&password=${this.ruleForm.password}`
+              `http://beian.028qmhy.cn:81/api/login/doLogin?userName=${this.ruleForm.username}&password=${this.ruleForm.password}`
             )
             .then((res) => {
               console.log(res);
               if (res.data.state === "ok") {
-                  let user = res.data.loginAccount
-                  // console.log(user,33)
+                let user = res.data.loginAccount;
+                // console.log(user,33)
                 localStorage.setItem("user", JSON.stringify(user));
-                  this.$router.push("/");
+                this.$router.push("/");
                 this.$message.success("登录成功");
               }
             })
@@ -97,37 +120,74 @@ export default {
       });
     },
   },
+  // 页面初始化方法
   mounted() {},
+  // 监听值变化
   watch: {},
+  // 计算
   computed: {},
-  filters: {},
 };
 </script>
 
 <style scoped lang='scss'>
-.box1 {
-  //   position: fixed;
-  //   margin: 0px;
+.demo-ruleForm {
+  margin-top: -50px;
+  background: white;
+  opacity: 0.8;
+  width: 25vw;
+  padding: 30px 50px 50px 50px;
+  border-radius: 7px;
+}
+.title {
+  margin: 0 auto 30px auto;
+  text-align: center;
+  color: #525151;
+}
+
+.img_abs {
+  position: absolute;
+  left: 6px;
+  top: 13px;
+}
+/deep/.el-input__inner {
+  padding: 0 30px;
+}
+.lizi {
+  background: linear-gradient(-180deg, #1a1454 0%, #0e81a5 100%);
+  width: 100vw;
+  height: 100vh;
+  // border: 1px solid red;
+  position: relative;
+}
+.login_box {
+  position: absolute;
+  top: 35%;
+  left: 50%;
+  transform: translate(-50%, 0);
+}
+
+@media screen and (max-width: 450px) {
+  // 表单
+  .demo-ruleForm {
+    margin-top: -50px;
+    background: rgba($color: rgb(218, 214, 214), $alpha: 0.3);
+    width: 55vw;
+    padding: 30px 50px 50px 50px;
+    border-radius: 7px;
+  }
+  // 粒子图
+  .lizi {
+    // background-image: url("../assets/timg.jpg");
+    background-repeat: no-repeat;
+    background-size: 100% 100%;
+    height: 100vh;
+    // border: 1px solid red;
+    position: relative;
+  }
+}
+.denglu{
   width: 100%;
-  height: 100%;
   display: flex;
   justify-content: center;
-  align-items: center;
 }
-.box2 {
-  width: 600px;
-  height: 300px;
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: space-around;
-}
-// // input输入框名字
-// .input-name {
-//   width: 100%;
-// }
-// .inputs {
-//   width: 80%;
-//   display: flex;
-// }
 </style>

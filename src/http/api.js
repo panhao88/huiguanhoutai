@@ -2,10 +2,5 @@
 import service from './index'
 export default {
     // 登录
-    login({ userName, password }) {
-        return service.req("login", {
-          userName,
-          password
-        });
-      },
+   
 }

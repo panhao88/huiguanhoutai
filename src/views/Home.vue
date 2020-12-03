@@ -56,7 +56,7 @@
         </el-table>
       </div>
       <!-- 编辑 -->
-      <div>
+      <div style="margin-top:20px">
         <el-pagination
           @size-change="handleSizeChange"
           @current-change="handleCurrentChange"
@@ -70,21 +70,22 @@
       </div>
       <div>
         <el-dialog title="编辑" :visible.sync="dialogFormVisibleaa">
-          <el-form :model="ruleFormmm" ref="ruleFormmm">
-            <el-form-item label="使用单位" label-width="80px">
+          <el-form :model="ruleFormmm" ref="ruleFormmm" :rules="ruleskk">
+            <el-form-item label="使用单位" label-width="80px" prop="username">
               <el-input v-model="ruleFormmm.username"></el-input>
             </el-form-item>
-            <el-form-item label="网站地址" label-width="80px">
+            <el-form-item label="网站地址" label-width="80px" prop="poldsitepa">
               <el-input v-model="ruleFormmm.poldsitepa"></el-input>
             </el-form-item>
-            <el-form-item label="授权天数" label-width="80px">
-              <el-input v-model="ruleFormmm.pdays"></el-input>
+            <el-form-item label="授权天数" label-width="80px" prop="pdays">
+              <el-input v-model.number="ruleFormmm.pdays"></el-input>
             </el-form-item>
             <el-form-item label="开始时间" label-width="80px">
               <el-date-picker
                 v-model="ruleFormmm.pbeginAt"
                 type="date"
                 placeholder="选择日期"
+                value-format="yyyy-MM-dd"
               >
               </el-date-picker>
             </el-form-item>
@@ -105,14 +106,15 @@
             <el-form-item label="网站地址" label-width="80px" prop="oldsite">
               <el-input v-model="ruleForm.oldsite"></el-input>
             </el-form-item>
-            <el-form-item label="授权天数" label-width="80px">
-              <el-input v-model="ruleForm.days"></el-input>
+            <el-form-item label="授权天数" label-width="80px" prop="days">
+              <el-input v-model.number="ruleForm.days"></el-input>
             </el-form-item>
             <el-form-item label="开始时间" label-width="80px">
               <el-date-picker
                 v-model="ruleForm.beginAt"
                 type="date"
                 placeholder="选择日期"
+                value-format="yyyy-MM-dd"
               >
               </el-date-picker>
             </el-form-item>
@@ -164,32 +166,70 @@ export default {
             message: "请输入单位",
             trigger: "blur",
           },
-          { min: 3, max: 8, message: "长度在 3 到 6 个字符", trigger: "blur" },
+        ],
+        oldsite: [
+          {
+            required: true,
+            message: "网站地址不能为空",
+            trigger: "blur",
+          },
+        ],
+        days: [
+          {
+            required: true,
+            message: "请输入权限天数",
+            trigger: "blur",
+          },
+          { type: "number", message: "天数必须为数字值" },
         ],
       },
-      
+      ruleskk: {
+        username: [
+          {
+            required: true,
+            message: "请输入单位",
+            trigger: "blur",
+          },
+          { min: 3, max: 8, message: "长度在 3 到 6 个字符", trigger: "blur" },
+        ],
+        poldsitepa: [
+          {
+            required: true,
+            message: "网站地址不能为空",
+            trigger: "blur",
+          },
+        ],
+        pdays: [
+          {
+            required: true,
+            message: "请输入权限天数",
+            trigger: "blur",
+          },
+          { type: "number", message: "天数必须为数字值" },
+        ],
+      },
     };
   },
   methods: {
     //数据列表
     getdata() {
       axios
-        .get("/api/api/site/sitePage")
+        .get("http://beian.028qmhy.cn:81/api/site/sitePage")
         .then((res) => {
           if (res.data.state === "ok") {
             this.arr = res.data.page.list;
-            let abb = []
-            this.arr.map((item,index) => {
-               abb = item.beginAt
-            })
-            console.log(abb)
+            let abb = [];
+            this.arr.map((item, index) => {
+              abb = item.beginAt;
+            });
+            console.log(abb);
             this.pageNumber = res.data.page.pageNumber;
             this.totalPage = res.data.page.totalPage;
             this.pageSize = res.data.page.pageSize;
             this.totalRow = res.data.page.totalRow;
           }
-          console.log(res.data,"data");
-          console.log(res.data.page.list)
+          console.log(res.data, "data");
+          console.log(res.data.page.list);
         })
         .catch((err) => {
           console.log(err);
@@ -211,13 +251,17 @@ export default {
       })
         .then(() => {
           axios
-            .post("/api/api/site/siteDelete", params)
+            .post("http://beian.028qmhy.cn:81/api/site/siteDelete", params)
             .then((res) => {
               console.log(res.data);
+              this.$message.error("删除成功");
+             
+              // this.arr = res.data.page.list
             })
             .catch((err) => {
               console.log(err);
             });
+              this.getdata();
         })
         .catch(() => {
           this.$message({
@@ -225,7 +269,6 @@ export default {
             message: "已取消删除",
           });
         });
-      this.getdata();
     },
     //添加
     goto() {
@@ -238,18 +281,17 @@ export default {
       params.append("oldsite", this.ruleForm.oldsite);
       params.append("days", this.ruleForm.days);
       params.append("beginAt", this.ruleForm.beginAt);
-        var time = new Date(this.ruleForm.beginAt)
-        var year = time.getFullYear();
-      console.log(year,"时间")
+      console.log(this.ruleForm.beginAt);
       axios
-        .post("/api/api/site/siteSave", params)
+        .post("http://beian.028qmhy.cn:81/api/site/siteSave", params)
         .then((res) => {
-          console.log(res.data, "添加");
+           this.getdata();
+          this.$message.success("添加成功");
+          // console.log(res.data, "添加");
         })
         .catch((err) => {
           console.log;
         });
-      this.getdata();
       this.ruleForm.name = "";
       this.ruleForm.oldsite = "";
       this.ruleForm.days = "";
@@ -276,10 +318,11 @@ export default {
       params.append("days", this.ruleFormmm.pdays);
       params.append("beginAt", this.ruleFormmm.pbeginAt);
       axios
-        .post("/api/api/site/siteUpdate", params)
+        .post("http://beian.028qmhy.cn:81/api/site/siteUpdate", params)
         .then((res) => {
           // if(res.data.)
           this.dialogFormVisibleaa = false;
+             this.$message.success("编辑成功");
         })
         .catch((err) => {
           console.log(err);
@@ -291,7 +334,7 @@ export default {
       this.pageSize = val;
       axios
         .get(
-          `/api/api/site/sitePage?pageSize=${this.pageSize}&pageNumber=${this.pageNumber}`
+          `http://beian.028qmhy.cn:81/api/site/sitePage?pageSize=${this.pageSize}&pageNumber=${this.pageNumber}`
         )
         .then((res) => {
           if (res.data.state === "ok") {
@@ -307,7 +350,7 @@ export default {
     handleCurrentChange(val) {
       this.pageNumber = val;
       axios
-        .get(`/api/api/site/sitePage?pageNumber=${this.pageNumber}`)
+        .get(`http://beian.028qmhy.cn:81/api/site/sitePage?pageNumber=${this.pageNumber}`)
         .then((res) => {
           if (res.data.state === "ok") {
             this.arr = res.data.page.list;
